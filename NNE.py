@@ -12,8 +12,7 @@ display_step = 1
 # Network Parameters
 n_hidden_1 = 256 # 1st layer number of features
 n_hidden_2 = 256 # 2nd layer number of features
-n_input = 784 # MNIST data input (img shape: 28*28)
-n_classes = 10 # MNIST total classes (0-9 digits)
+n_input = 8 # MNIST data input (img shape: 28*28)
 
 # tf Graph input
 x = tf.placeholder("float", [None, n_input])
@@ -47,12 +46,11 @@ biases = {
 # Construct model
 pred = multilayer_perceptron(x, weights, biases)
 # Define loss and optimizer
-cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+#cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+cost = tf.reduce_mean(tf.nn.l2_loss(t=pred-y))
 optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 # Initializing the variables
 init = tf.global_variables_initializer()
-
-
 
 
 # Launch the graph
@@ -62,10 +60,10 @@ with tf.Session() as sess:
     # Training cycle
     for epoch in range(training_epochs):
         avg_cost = 0.
-        total_batch = int(mnist.train.num_examples/batch_size)
+        total_batch = int(dc.num_example/batch_size)
         # Loop over all batches
         for i in range(total_batch):
-            batch_x, batch_y = data_construct.next_batch(batch_size)
+            batch_x, batch_y = dc.next_batch(batch_size)
             # Run optimization op (backprop) and cost op (to get loss value)
             _, c = sess.run([optimizer, cost], feed_dict={x: batch_x,
                                                           y: batch_y})
@@ -89,7 +87,8 @@ def main():
 	#reload object from the file
 	with open(r'./td', 'rb') as _load_file:
 		new_d = pickle.load(_load_file)
-	print new_d
+	#print new_d
+	dc=data_construct(4,new_d)
 
 if __name__ == "__main__":
     main()
