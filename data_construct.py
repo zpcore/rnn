@@ -1,4 +1,4 @@
-import tensorflow as tf
+import numpy as np
 
 class data_construct:
 	data=[]
@@ -9,23 +9,30 @@ class data_construct:
 		self.data=data
 		self.length=length
 		self.num_example=len(data)
+		self.count=0
 
-	def next_batch(batch_size):
-		
-		temp_data=data.range(count*(length+batch_size-1),(count+1)*(length+batch_size-1)-1)
-		batch_x[:]=[]
-		for i in batch_size:
-			for j in length:
-				batch_x.append(temp_data[i*length+j][0:1,0])
-			batch_y.append(temp_data[length-1][2,0])
-		count+=1#count+=length
-		if (count+length-1)*batch_size>=len(data):
-			count=0
-		#batch_y=temp_data[length-1][2:3,0]
-		
+	def clr_count(self):
+		self.count=0
+
+	def next_batch(self,batch_x,batch_y,batch_size):
+		temp_data=self.data[self.count*batch_size
+			:self.count*batch_size+batch_size+self.length-2+1]
+		#print temp_data
+		for i in range(batch_size):
+			for j in range(self.length):
+				batch_x+=temp_data[i+j][0:2,0].tolist()
+			batch_y.append(temp_data[i+self.length-1][2,0].tolist())
+		self.count+=1#count+=length
+		batch_x=np.reshape(batch_x,(batch_size,batch_size*self.length))
+		batch_y=np.reshape(batch_y,(batch_size,1))
+		#print batch_x
+		#print batch_y
+		#in case list go out of range
+		if self.count*batch_size+batch_size+self.length-2>=len(self.data):
+			self.count=0
 		return batch_x, batch_y
 
-
+#class property
 	@property
 	def data(self):
 		return self.data
@@ -35,5 +42,5 @@ class data_construct:
 		return self.count
 
 	@property
-	def num_example():
+	def num_example(self):
 		return self.num_example
