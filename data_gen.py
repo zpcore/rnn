@@ -4,10 +4,12 @@ import pickle
 from scipy import signal as sg
 
 def data_gen():
-	parser = argparse.ArgumentParser(description='Generate Training Samples')
-	parser.add_argument('-n', action="store", dest="ts", type=int)
+	parser = argparse.ArgumentParser(description='Generate Training and Testing Samples')
+	parser.add_argument('-n', action="store", dest="ts1", type=int)
+	parser.add_argument('-t', action="store", dest="ts2", type=int)
 
-	trainingsample = parser.parse_args().ts
+	trainingsample = parser.parse_args().ts1
+	testingsample = parser.parse_args().ts2
 
 	A=np.array([[0,0,1,0],[0,0,0,1],[-2,1,0,0],[1,-2,0,0]])
 	B=np.array([[0,0],[0,0],[1,0],[0,1]])
@@ -24,7 +26,7 @@ def data_gen():
 	#	y=sys.C.dot(x)+sys.D.dot(f)
 
 	#store the training data in a file for future analysis
-	with open(r'./td', 'wb') as afile:
+	with open(r'./traindata.log', 'wb') as afile:
 		pickle.dump(ls, afile)
 
 	#reload object from the file
@@ -32,7 +34,18 @@ def data_gen():
 	with open(r'./td', 'rb') as _load_file:
 		new_d = pickle.load(_load_file)
 	"""
-	#print new_d
+
+	ls=[]
+	for i in range(testingsample):
+		ls.append(x)
+		f=2*(np.random.rand(2,1)-0.5)#random force to the mass
+		x=sys.A.dot(x)+sys.B.dot(f)
+	#	y=sys.C.dot(x)+sys.D.dot(f)
+
+	#store the training data in a file for future analysis
+	with open(r'./testdata.log', 'wb') as afile:
+		pickle.dump(ls, afile)
+
 
 if __name__ == "__main__":
-		data_gen()
+	data_gen()

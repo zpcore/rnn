@@ -57,10 +57,14 @@ optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
 # Initializing the variables
 init = tf.global_variables_initializer()
 
-with open(r'./td', 'rb') as _load_file:
-	new_d = pickle.load(_load_file)
-#print new_d
-dc=data_construct(predict_horizon,new_d)
+with open(r'./traindata.log', 'rb') as _load_file:
+	train_data = pickle.load(_load_file)
+
+with open(r'./testdata.log', 'rb') as _load_file2:
+	test_data = pickle.load(_load_file2)
+
+dc=data_construct(predict_horizon,train_data)
+tc=data_construct(predict_horizon,test_data)
 
 # Launch the graph
 with tf.Session() as sess:
@@ -84,10 +88,16 @@ with tf.Session() as sess:
 				dc.clr_count()
 
 		print "Optimization Finished!"
+		print "Testing the Neural Network"
+
+        #for _ in range(10)#10 test data
+
+
 
 		# Test model
 		#correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
-		# Calculate accuracy
+		
+        # Calculate accuracy
 		#accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
 		#print "Accuracy:", accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
 
@@ -96,9 +106,9 @@ with tf.Session() as sess:
 # def main():
 # 	#reload object from the file
 # 	with open(r'./td', 'rb') as _load_file:
-# 		new_d = pickle.load(_load_file)
-# 	#print new_d
-# 	dc=data_construct(4,new_d)
+# 		train_data = pickle.load(_load_file)
+# 	#print train_data
+# 	dc=data_construct(4,train_data)
 
 # if __name__ == "__main__":
 #     main()

@@ -3,8 +3,10 @@
 
 echo "Choose size of training data:"
 read n
-echo -e "Generating the training data (n=$n)...\n"
-python ./data_gen.py -n $n
+echo "Choose size of testing data:"
+read t
+echo -e "Generating the training data (n=$n), testing data (t=$t)...\n"
+python ./data_gen.py -n $n -t $t
 echo -e "Training data is stored in file named ts.\n"
 
 echo -e "Running TensorFlow..."
