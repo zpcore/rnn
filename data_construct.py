@@ -23,9 +23,8 @@ class data_construct:
 				batch_x+=temp_data[i+j][0:2,0].tolist()
 			batch_y.append(temp_data[i+self.length-1][2,0].tolist())
 		self.count+=1#count+=length
-		batch_x=np.reshape(batch_x,(batch_size,batch_size*self.length))
+		batch_x=np.reshape(batch_x,(batch_size,2*self.length))
 		batch_y=np.reshape(batch_y,(batch_size,1))
-		#print batch_x
 		#print batch_y
 		#in case list go out of range
 		if self.count*batch_size+batch_size+self.length-2>=len(self.data):

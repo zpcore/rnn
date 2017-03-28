@@ -1,13 +1,15 @@
+from __future__ import division
 import numpy as np
 import pickle
 import tensorflow as tf
+import matplotlib.pyplot as plt
 from data_construct import data_construct
 import data_gen
 
 # Parameters
 learning_rate = 0.001
 training_epochs = 15
-batch_size = 2#100
+batch_size = 4#100
 display_step = 1
 
 # Network Parameters
@@ -90,16 +92,20 @@ with tf.Session() as sess:
 		print "Optimization Finished!"
 		print "Testing the Neural Network"
 
-        #for _ in range(10)#10 test data
-
-
-
-		# Test model
-		#correct_prediction = tf.equal(tf.argmax(pred, 1), tf.argmax(y, 1))
+		batch_x=[]
+		batch_y=[]
+		#for _ in range(100):
+		batch_x, batch_y = tc.next_batch(batch_x,batch_y,100)
+		testing_cost = sess.run(cost, feed_dict={x: batch_x, y: batch_y})/100
+		print "L2 cost per batch:",testing_cost
 		
-        # Calculate accuracy
-		#accuracy = tf.reduce_mean(tf.cast(correct_prediction, "float"))
-		#print "Accuracy:", accuracy.eval({x: mnist.test.images, y: mnist.test.labels})
+		print train_data.size()
+		plt.figure()
+		plt.plot(train_data, 'ro', label='Normalized samples')
+
+		#Save the trained neural network into a file
+		#saver = tf.train.Saver()
+		#saver.save(sess, "NN.log")
 
 
 
