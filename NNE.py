@@ -1,29 +1,13 @@
 from __future__ import division
+import argparse
 import numpy as np
 import pickle
 import tensorflow as tf
-import matplotlib.pyplot as plt
 from data_construct import data_construct
 import data_gen
+import matplotlib.pyplot as plt
 
-# Parameters
-learning_rate = 0.001
-training_epochs = 15
-batch_size = 4#100
-display_step = 1
 
-# Network Parameters
-n_hidden_1 = 4 # 1st layer number of features
-n_hidden_2 = 4 # 2nd layer number of features
-n_input = 8 # MNIST data input (img shape: 28*28)
-n_output=1
-
-#test data parameters
-predict_horizon = 4
-
-# tf Graph input
-x = tf.placeholder("float", [None, n_input])
-y = tf.placeholder("float", [None, n_output])
 
 # Create model
 def multilayer_perceptron(x, weights, biases):
@@ -37,39 +21,61 @@ def multilayer_perceptron(x, weights, biases):
 	out_layer = tf.matmul(layer_2, weights['out']) + biases['out']
 	return out_layer
 
+def main():
+	# Parameters
+	learning_rate = 0.001
+	training_epochs = 30
+	batch_size = 10#100
+	display_step = 1
 
-# Store layers weight & bias
-weights = {
-	'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
-	'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
-	'out': tf.Variable(tf.random_normal([n_hidden_2, n_output]))
-}
-biases = {
-	'b1': tf.Variable(tf.random_normal([n_hidden_1])),
-	'b2': tf.Variable(tf.random_normal([n_hidden_2])),
-	'out': tf.Variable(tf.random_normal([n_output]))
-}
+	# Network Parameters
+	n_hidden_1 = 4 # 1st layer number of features
+	n_hidden_2 = 4 # 2nd layer number of features
+	n_input = 8 # MNIST data input (img shape: 28*28)
+	n_output=1
 
-# Construct model
-pred = multilayer_perceptron(x, weights, biases)
-# Define loss and optimizer
-#cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
-cost = tf.reduce_mean(tf.nn.l2_loss(t=pred-y))
-optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
-# Initializing the variables
-init = tf.global_variables_initializer()
+	#test data parameters
+	predict_horizon = 4
 
-with open(r'./traindata.log', 'rb') as _load_file:
-	train_data = pickle.load(_load_file)
+	parser = argparse.ArgumentParser(description='Number of Testing Samples')
+	parser.add_argument('-n', action="store", dest="ts", type=int)
+	sim_len = parser.parse_args().ts
 
-with open(r'./testdata.log', 'rb') as _load_file2:
-	test_data = pickle.load(_load_file2)
+	# tf Graph input
+	x = tf.placeholder("float", [None, n_input])
+	y = tf.placeholder("float", [None, n_output])
+	# Store layers weight & bias
+	weights = {
+		'h1': tf.Variable(tf.random_normal([n_input, n_hidden_1])),
+		'h2': tf.Variable(tf.random_normal([n_hidden_1, n_hidden_2])),
+		'out': tf.Variable(tf.random_normal([n_hidden_2, n_output]))
+	}
+	biases = {
+		'b1': tf.Variable(tf.random_normal([n_hidden_1])),
+		'b2': tf.Variable(tf.random_normal([n_hidden_2])),
+		'out': tf.Variable(tf.random_normal([n_output]))
+	}
 
-dc=data_construct(predict_horizon,train_data)
-tc=data_construct(predict_horizon,test_data)
+	# Construct model
+	pred = multilayer_perceptron(x, weights, biases)
+	# Define loss and optimizer
+	#cost = tf.reduce_mean(tf.nn.softmax_cross_entropy_with_logits(logits=pred, labels=y))
+	cost = tf.reduce_mean(tf.nn.l2_loss(t=pred-y))
+	optimizer = tf.train.AdamOptimizer(learning_rate=learning_rate).minimize(cost)
+	# Initializing the variables
+	init = tf.global_variables_initializer()
 
-# Launch the graph
-with tf.Session() as sess:
+	with open(r'./traindata.log', 'rb') as _load_file:
+		train_data = pickle.load(_load_file)
+
+	with open(r'./testdata.log', 'rb') as _load_file2:
+		test_data = pickle.load(_load_file2)
+
+	dc=data_construct(predict_horizon,train_data)
+	tc=data_construct(predict_horizon,test_data)
+
+	# Launch the graph
+	with tf.Session() as sess:
 		sess.run(init)
 		# Training cycle
 		for epoch in range(training_epochs):
@@ -90,31 +96,40 @@ with tf.Session() as sess:
 				dc.clr_count()
 
 		print "Optimization Finished!"
-		print "Testing the Neural Network"
-
-		batch_x=[]
-		batch_y=[]
-		#for _ in range(100):
-		batch_x, batch_y = tc.next_batch(batch_x,batch_y,100)
-		testing_cost = sess.run(cost, feed_dict={x: batch_x, y: batch_y})/100
-		print "L2 cost per batch:",testing_cost
 		
-		print train_data.size()
-		plt.figure()
-		plt.plot(train_data, 'ro', label='Normalized samples')
+		print "Testing the Neural Network with ",sim_len," steps..."
+		# batch_x=[]
+		# batch_y=[]
+		# #for _ in range(100):
+		# batch_x, batch_y = tc.next_batch(batch_x,batch_y,100)
+		# testing_cost = sess.run(cost, feed_dict={x: batch_x, y: batch_y})/100
+		# print "L2 cost per batch:",testing_cost
+		x_plot=[]
+		y_plot=[]
+		x_plot,y_plot=tc.plot_data(x_plot,y_plot,sim_len)
 
-		#Save the trained neural network into a file
-		#saver = tf.train.Saver()
-		#saver.save(sess, "NN.log")
+
+		test_x=[]
+		test_y=[]
+		#prediction=[]	
+		test_x, batch_y = tc.next_batch(test_x,test_y,sim_len)
+		prediction=sess.run(pred,feed_dict={x:test_x})
+		
+		f, axarr = plt.subplots(2, sharex=True)
+		axarr[0].plot(np.arange(sim_len), y_plot)
+		axarr[0].set_title('True Result')
+		axarr[1].plot(np.arange(sim_len), prediction)
+		axarr[1].set_title('Prediction Result')
+		plt.show()
+
+	# 		#Save the trained neural network into a file
+	# 		#saver = tf.train.Saver()
+	# 		#saver.save(sess, "NN.log")
 
 
 
-# def main():
-# 	#reload object from the file
-# 	with open(r'./td', 'rb') as _load_file:
-# 		train_data = pickle.load(_load_file)
-# 	#print train_data
-# 	dc=data_construct(4,train_data)
 
-# if __name__ == "__main__":
-#     main()
+
+
+if __name__ == "__main__":
+    main()

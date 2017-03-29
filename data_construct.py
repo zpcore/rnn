@@ -20,7 +20,7 @@ class data_construct:
 		#print temp_data
 		for i in range(batch_size):
 			for j in range(self.length):
-				batch_x+=temp_data[i+j][0:2,0].tolist()
+				batch_x+=(temp_data[i+j][0:2,0].tolist())
 			batch_y.append(temp_data[i+self.length-1][2,0].tolist())
 		self.count+=1#count+=length
 		batch_x=np.reshape(batch_x,(batch_size,2*self.length))
@@ -30,6 +30,14 @@ class data_construct:
 		if self.count*batch_size+batch_size+self.length-2>=len(self.data):
 			self.count=0
 		return batch_x, batch_y
+
+	def plot_data(self,x,y,sim_len):
+		for i in range(sim_len):
+			x+=self.data[self.length+i-1][0:2,0].tolist()
+			y.append(self.data[i+self.length-1][2,0].tolist())
+		x=np.reshape(x,(sim_len,2))
+		y=np.reshape(y,(sim_len,1))
+		return x,y
 
 #class property
 	@property
