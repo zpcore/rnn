@@ -20,6 +20,9 @@ def data_gen():
 	x=np.array([[10],[20],[0],[0]],dtype=np.float64)
 	ls=[]
 	for i in range(trainingsample):
+		mu, sigma = 0, 0.25 # mean and standard deviation
+		s = np.random.normal(mu, sigma, 2)
+		#x[0:2,0]+=s
 		ls.append(x)	
 		f=2*(np.random.rand(2,1)-0.5)#random force to the mass
 		x=sys.A.dot(x)+sys.B.dot(f)

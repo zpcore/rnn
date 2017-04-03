@@ -115,16 +115,16 @@ def main():
 		test_x, batch_y = tc.next_batch(test_x,test_y,sim_len)
 		prediction=sess.run(pred,feed_dict={x:test_x})
 		
-		f, axarr = plt.subplots(2, sharex=True)
+		f, axarr = plt.subplots(2, sharex=True, sharey=True)
 		axarr[0].plot(np.arange(sim_len), y_plot)
 		axarr[0].set_title('True Result')
 		axarr[1].plot(np.arange(sim_len), prediction)
 		axarr[1].set_title('Prediction Result')
 		plt.show()
 
-	# 		#Save the trained neural network into a file
-	# 		#saver = tf.train.Saver()
-	# 		#saver.save(sess, "NN.log")
+		#Save the trained neural network into a file
+		#saver = tf.train.Saver()
+		#saver.save(sess, "NN.log")
 
 
 
